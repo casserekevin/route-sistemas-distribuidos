@@ -50,8 +50,12 @@ module.exports = function UtilFunctions() {
             }
         })
 
-        let mapped_cities = reduced.map((element) => {
-            return new Point(element.origin)
+        let mapped_cities = reduced.map((element, index) => {
+            let latLng = cities[index]
+            let latLng_splitted = latLng.split(',', 2)
+            let lat = latLng_splitted[0]
+            let lng = latLng_splitted[1]
+            return new Point(element.origin, lat, lng)
         })
 
         return mapped_cities

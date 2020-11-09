@@ -1,20 +1,20 @@
-module.exports = function Point(name = null, x = null, y = null) {
-    if(!(name === null)){
+module.exports = function Point(name = null, lat = null, lng = null) {
+    if(!(name === null) && !(lat === null) && !(lng === null)){
         this.name = name
-        this.x = x;
-        this.y = y;
+        this.lat = lat;
+        this.lng = lng;
     }
 
     this.get_name = () => {
         return this.name
     }
 
-    this.get_x = () => {
-        return this.x
+    this.get_lat = () => {
+        return this.lat
     }
 
-    this.get_y = () => {
-        return this.y
+    this.get_lng = () => {
+        return this.lng
     }
 
     this.equal = (other) => {
@@ -26,10 +26,17 @@ module.exports = function Point(name = null, x = null, y = null) {
     }
 
     this.print = () => { 
-        console.log(`Point ${this.name}: (${this.x}, ${this.y})`)
+        console.log(`Point ${this.name}: (${this.lat}, ${this.lng})`)
     }
 
     this.to_string = () => { 
         return `${this.name}`
+    }
+
+    this.to_obj = () => {
+        return {
+            lat: +this.lat,
+            lng: +this.lng
+        }
     }
 }

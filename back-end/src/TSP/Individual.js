@@ -154,10 +154,13 @@ module.exports = function Individual(individual, distance=null) {
     }
 
     this.to_array = () => {
+        let initial_point = undefined
         let array = []
         for(let i = 0; i < this.size; i++){
-            array.push(this.points[i].to_string())
+            initial_point = this.points[0].to_obj()
+            array.push(this.points[i].to_obj())
         }
+        array.push(initial_point)
 
         return array
     }
