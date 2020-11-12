@@ -1,81 +1,134 @@
 /* global google */
-import React from 'react';
-const { withScriptjs, withGoogleMap, GoogleMap, DirectionsRenderer, Marker } = require("react-google-maps")
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+
+import { GoogleMap, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 
 
 
+const containerStyle = {
+  width: "50vw", 
+  height: "50vh", 
+  marginLeft:"auto", 
+  marginRight:"auto"
+};
 
-class MapDirectionsRenderer extends React.Component {
-    state = {
-      directions: null,
-      error: null
-    };
-  
-    componentDidMount() {
-      const { places, travelMode } = this.props;
-      
-      const waypoints = places.map(p =>({
-          location: {lat: p.lat, lng: p.lng},
-          stopover: true
-      }))
-      const origin = waypoints.shift().location;
-      const destination = waypoints.pop().location;
-      
-      
-  
-      const directionsService = new google.maps.DirectionsService();
-      directionsService.route(
-        {
-          origin: origin,
-          destination: destination,
-          travelMode: travelMode,
-          waypoints: waypoints
-        },
-        (result, status) => {
-          if (status === google.maps.DirectionsStatus.OK) {
-            this.setState({
-              directions: result
-            });
-          } else {
-            this.setState({ error: result });
-          }
-        }
-      );
-    }
-  
-    render() {
-      if (this.state.error) {
-        return <h1>{this.state.error}</h1>;
-      }
-      return (this.state.directions && <DirectionsRenderer directions={this.state.directions} />)
-    }
+const center = {
+  lat:-29.7926, 
+  lng:-51.156879
 }
 
+const options_gm = { 
+  disableDefaultUI: true, 
+  zoomControl: true 
+}
 
-const Map = withScriptjs(withGoogleMap((props) => (
-    <GoogleMap
-        defaultCenter={{ lat:-29.7926, lng:-51.156879 }}
-        defaultZoom={7}
-        defaultOptions={{ disableDefaultUI: true, zoomControl: true }}
-    >
-        {
-          // !!props.places && ( 
-          //   props.places.map((places, index) => {
-          //     const position = { lat: places.lat, lng: places.lng };
-          //     return <Marker key={index} position={position} />;
-          //   })
-          // )
-        }
+const generate_options = (origin, destination, waypoints) => {
+  return {
+      origin: origin,
+      destination: destination,
+      waypoints: waypoints,
+      travelMode: 'DRIVING'
+  }
+}
 
-        {
-        !!props.places && (
-          <MapDirectionsRenderer
-              places={props.places}
-              travelMode={google.maps.TravelMode.DRIVING}
-          />)
+const Map = (props) => {
+  const [ origin, setOrigin ] = useState(null)
+  const [ destination, setDestination ] = useState(null)
+  const [ waypoints, setwaypoints ] = useState(null)
+  const options_memo = useMemo(() => {
+    return generate_options(origin, destination, waypoints)
+  }, [origin, destination, waypoints])
+
+  const [ directions, setDirections ] = useState(null)
+  const [ error, setError ] = useState(null)
+
+  
+
+  //                        (bestRoute)
+  // toda vez que atualizar props.places -> (origin, destination, waypoints) -> rerender <DirectionsService/> -> directionsServiceCallback -> (directions) -> rerender <DirectionsRenderer/>
+  useEffect(() => {
+    debugger
+    if(props.places !== null){
+      const { places } = props;
+        
+      let waypoints_mapped = places.map(p =>({
+        location: {lat: p.lat, lng: p.lng},
+        stopover: true
+      }))
+  
+      setOrigin(waypoints_mapped.shift().location)
+      setDestination(waypoints_mapped.pop().location)
+      setwaypoints(waypoints_mapped)
+  
+      props.setBuscarRota(true)
+    }
+  },[props.places])
+
+
+  const directionsServiceCallback = useCallback((response) => {
+      console.log(response)
+  
+      if (response !== null) {
+        if (response.status === 'OK') {
+          setDirections(response)
+          props.setBuscarRota(false)
+        } 
+        else {
+          setError({ error: response });
         }
-    </GoogleMap>
-  ))
-)
+      }
+    }, [])
+
+
+  return (
+  <GoogleMap
+      mapContainerStyle={containerStyle}
+      center={center}
+      zoom={7}
+      options={options_gm}
+      onLoad={props.onLoad}
+      onUnmount={props.onUnmount}
+  >
+      { 
+        (props.buscarRota) && ( 
+          <DirectionsService
+            // required
+            options={options_memo}
+            // required
+            callback={directionsServiceCallback}
+            // optional
+            onLoad={directionsService => {
+              console.log('DirectionsService onLoad directionsService: ', directionsService)
+            }}
+            // optional
+            onUnmount={directionsService => {
+              console.log('DirectionsService onUnmount directionsService: ', directionsService)
+            }}
+          />
+        )
+      }
+
+      {
+        directions && (
+          <DirectionsRenderer
+            // required
+            options={{ 
+              directions: directions
+            }}
+            // optional
+            onLoad={directionsRenderer => {
+              console.log('DirectionsRenderer onLoad directionsRenderer: ', directionsRenderer)
+            }}
+            // optional
+            onUnmount={directionsRenderer => {
+              console.log('DirectionsRenderer onUnmount directionsRenderer: ', directionsRenderer)
+            }}
+          />
+        )
+      }
+  </GoogleMap>
+  )
+}
+
 
 export default Map
