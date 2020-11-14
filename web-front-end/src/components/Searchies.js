@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux'
 
 const Searchies = (props) => {
 
-    const points = useSelector((state) => state.route.points)
+    const points = useSelector((state) => state.point.points)
 
     return(
         <div>

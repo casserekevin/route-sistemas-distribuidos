@@ -1,6 +1,9 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import { GoogleMap, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
+
+import { useSelector, useDispatch } from 'react-redux'
+import { setSearchForRoute, fetchBestRouteError } from '../redux'
 
 
 
@@ -21,47 +24,20 @@ const options_gm = {
   zoomControl: true 
 }
 
-const generate_options = (origin, destination, waypoints) => {
-  return {
-      origin: origin,
-      destination: destination,
-      waypoints: waypoints,
-      travelMode: 'DRIVING'
-  }
-}
-
 const Map = (props) => {
-  const [ origin, setOrigin ] = useState(null)
-  const [ destination, setDestination ] = useState(null)
-  const [ waypoints, setwaypoints ] = useState(null)
-  const options_memo = useMemo(() => {
-    return generate_options(origin, destination, waypoints)
-  }, [origin, destination, waypoints])
+  //redux
+  const dispatch = useDispatch()
+
+  const mapOptions = useSelector((state) => state.route.mapOptions)
+  const search_for_route = useSelector((state) => state.route.search_for_route)
+
+  const handleSetSearchForRoute = (data) => dispatch(setSearchForRoute(data))
+  const handleFetchBestRouteError = (error) => dispatch(fetchBestRouteError(error))
+
+
 
   const [ directions, setDirections ] = useState(null)
-  const [ error, setError ] = useState(null)
 
-  
-
-  //                        (bestRoute)
-  // toda vez que atualizar props.places -> (origin, destination, waypoints) -> rerender <DirectionsService/> -> directionsServiceCallback -> (directions) -> rerender <DirectionsRenderer/>
-  useEffect(() => {
-    debugger
-    if(props.places !== null){
-      const { places } = props;
-        
-      let waypoints_mapped = places.map(p =>({
-        location: {lat: p.lat, lng: p.lng},
-        stopover: true
-      }))
-  
-      setOrigin(waypoints_mapped.shift().location)
-      setDestination(waypoints_mapped.pop().location)
-      setwaypoints(waypoints_mapped)
-  
-      props.setBuscarRota(true)
-    }
-  },[props.places])
 
 
   const directionsServiceCallback = useCallback((response) => {
@@ -69,11 +45,13 @@ const Map = (props) => {
   
       if (response !== null) {
         if (response.status === 'OK') {
+          debugger
           setDirections(response)
-          props.setBuscarRota(false)
+          handleSetSearchForRoute(false)
         } 
         else {
-          setError({ error: response });
+          debugger
+          handleFetchBestRouteError(response)
         }
       }
     }, [])
@@ -89,10 +67,10 @@ const Map = (props) => {
       onUnmount={props.onUnmount}
   >
       { 
-        (props.buscarRota) && ( 
+        (search_for_route) && ( 
           <DirectionsService
             // required
-            options={options_memo}
+            options={mapOptions}
             // required
             callback={directionsServiceCallback}
             // optional

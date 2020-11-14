@@ -1,27 +1,72 @@
-import { PLUS_POINTS, MINUS_POINTS, SET_POINT } from './routeTypes'
+import { FETCH_BEST_ROUTE_SUCCESS, FETCH_BEST_ROUTE_ERROR, SET_SEARCH_FOR_ROUTE } from './routeTypes'
 
-export const plusPoints = () => {
-    debugger
+import RouteService from '../../services/RouteService'
+import PointsValidation from '../../validations/PointsValidation'
+
+const fetchBestRouteSuccess = (data) => {
     return {
-        type: PLUS_POINTS
+        type: FETCH_BEST_ROUTE_SUCCESS,
+        payload: data
     }
 }
 
-export const minusPoints = () => {
-    debugger
+export const fetchBestRouteError = (error) => {
     return {
-        type: MINUS_POINTS
+        type: FETCH_BEST_ROUTE_ERROR,
+        payload: error
     }
 }
 
-export const setPoint = (index, value) => {
-    debugger
+export const fetchBestRoute = (ummaped_cities) => {
 
-    return {
-        type: SET_POINT,
-        payload: {
-            index: index,
-            value: value
+    return (dispatch) => {
+        
+        if(!PointsValidation.isValid(ummaped_cities)){
+            dispatch(fetchBestRouteError("Without first and last point"))
         }
+        else {
+            let mapped_cities = ummaped_cities.map((element) => {
+                return `${element.lat},${element.lng}`
+            })
+            let cities = {
+                "cities": mapped_cities
+            }
+            
+            RouteService.getBestRoute(cities)
+            .then((response) => {
+                let best_route = response.data.individuo
+    
+                let waypoints_mapped = best_route.map(p =>({
+                    location: {lat: p.lat, lng: p.lng},
+                    stopover: true
+                  }))
+                
+                let origin = waypoints_mapped.shift().location
+                let destination = waypoints_mapped.pop().location
+                let waypoints = waypoints_mapped
+    
+                let data = {
+                    mapOptions: {
+                        origin: origin,
+                        destination: destination,
+                        waypoints: waypoints,
+                        travelMode: 'DRIVING'
+                    }
+                }
+                dispatch(fetchBestRouteSuccess(data))
+                dispatch(setSearchForRoute(true))
+            })
+            .catch((error) => {
+                let errorMsg = error.message
+                dispatch(fetchBestRouteError(errorMsg))
+            })
+        }
+    }
+}
+
+export const setSearchForRoute = (data) => {
+    return {
+        type: SET_SEARCH_FOR_ROUTE,
+        payload: data
     }
 }
