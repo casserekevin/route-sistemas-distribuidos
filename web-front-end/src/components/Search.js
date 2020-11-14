@@ -1,12 +1,20 @@
 import React from 'react';
 
 import usePlacesAutocomplete, { getGeocode, getLatLng } from 'use-places-autocomplete'
-import { Combobox, ComboboxInput, ComboboxPopover, ComboboxList, ComboboxOption } from '@reach/combobox'
+import { Combobox, ComboboxInput, ComboboxPopover, ComboboxOption } from '@reach/combobox'
 import "@reach/combobox/styles.css";
+
+import { useDispatch } from 'react-redux'
+import { setPoint } from '../redux'
 
 import './search.css'
 
-const Search = ({panTo, index, setRouteValue}) => {
+const Search = ({panTo, index}) => {
+    //redux
+    const dispatch = useDispatch()
+
+    const handleSetPoint = (index, value) => dispatch(setPoint(index, value))
+
     const { 
         ready, 
         value, 
@@ -31,7 +39,7 @@ const Search = ({panTo, index, setRouteValue}) => {
                         const results = await getGeocode({address})
                         const { lat, lng } = await getLatLng(results[0])
                         panTo({ lat, lng })
-                        setRouteValue(index, {lat: lat, lng: lng})
+                        handleSetPoint(index, {lat: lat, lng: lng})
                     } catch (error) {
                         console.log(error)
                     }

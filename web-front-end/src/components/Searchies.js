@@ -2,12 +2,17 @@ import React from 'react'
 
 import Search from './Search'
 
-const Searchies = ({route, panTo, setRouteValue}) => {
+import { useSelector } from 'react-redux'
+
+const Searchies = (props) => {
+
+    const points = useSelector((state) => state.route.points)
+
     return(
         <div>
-            {route.map((search, index) => {
+            {points.map((search, index) => {
                 return (
-                    <Search key={index} index={index} panTo={panTo} setRouteValue={setRouteValue}/>
+                    <Search key={index} index={index} panTo={props.panTo}/>
                 )
             })}
         </div>

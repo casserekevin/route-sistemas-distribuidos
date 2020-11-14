@@ -1,4 +1,3 @@
-/* global google */
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import { GoogleMap, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
