@@ -11,9 +11,6 @@ import './global.css'
 
 
 
-
-
-
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>

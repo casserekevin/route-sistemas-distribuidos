@@ -9,6 +9,8 @@ import './App.css';
 import { useDispatch, useSelector } from 'react-redux'
 import { plusPoints, minusPoints, fetchBestRoute } from './redux'
 
+import functionsTime from './utils/time'
+
 
 
 const libraries = ['places']
@@ -44,12 +46,12 @@ const App = (props) => {
 
     const points = useSelector((state) => state.point.points)
 
-    const handlePlusPoints = () => dispatch(plusPoints())
-    const handleMinusPoints = () => dispatch(minusPoints())
+    const handlePlusPoints = () => functionsTime(() => dispatch(plusPoints())) 
+    const handleMinusPoints = () => functionsTime(() => dispatch(minusPoints())) 
 
     
 
-    const handlefetchBestRoute = (points) => dispatch(fetchBestRoute(points))
+    const handlefetchBestRoute = (points) => functionsTime(() => dispatch(fetchBestRoute(points))) 
 
 
 
@@ -58,10 +60,17 @@ const App = (props) => {
 
     return (
             <div>
+                <div className="title_container">
+                    <h1>Gerador de rotas</h1>
+                </div>
                 <Searchies panTo={panTo}/>
-                <button onClick={handlePlusPoints}>+</button>
-                <button onClick={handleMinusPoints}>-</button>
-                <button onClick={() => handlefetchBestRoute(points)}>Calcular melhor rota</button>
+                <div className="buttons_container">
+                    <div>
+                        <button onClick={handlePlusPoints}>+</button>
+                        <button onClick={handleMinusPoints}>-</button>
+                        <button onClick={() => handlefetchBestRoute(points)}>Calcular melhor rota</button>
+                    </div>
+                </div>
                 <Map
                     onLoad={onLoad}
                     onUnmount={onUnmount}

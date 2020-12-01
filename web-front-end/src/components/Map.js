@@ -29,6 +29,7 @@ const Map = (props) => {
   const dispatch = useDispatch()
 
   const mapOptions = useSelector((state) => state.route.mapOptions)
+  
   const search_for_route = useSelector((state) => state.route.search_for_route)
 
   const handleSetSearchForRoute = (data) => dispatch(setSearchForRoute(data))
@@ -45,17 +46,22 @@ const Map = (props) => {
   
       if (response !== null) {
         if (response.status === 'OK') {
-          debugger
           setDirections(response)
           handleSetSearchForRoute(false)
         } 
         else {
-          debugger
           handleFetchBestRouteError(response)
         }
       }
     }, [])
 
+  
+  const directionsServiceProps = {
+    options: mapOptions,
+    callback: directionsServiceCallback,
+    onLoad: (directionsService) => console.log('DirectionsService onLoad directionsService: ', directionsService),
+    onUnmount: (directionsService) => console.log('DirectionsService onUnmount directionsService: ', directionsService)
+  }  
 
   return (
   <GoogleMap
@@ -68,20 +74,7 @@ const Map = (props) => {
   >
       { 
         (search_for_route) && ( 
-          <DirectionsService
-            // required
-            options={mapOptions}
-            // required
-            callback={directionsServiceCallback}
-            // optional
-            onLoad={directionsService => {
-              console.log('DirectionsService onLoad directionsService: ', directionsService)
-            }}
-            // optional
-            onUnmount={directionsService => {
-              console.log('DirectionsService onUnmount directionsService: ', directionsService)
-            }}
-          />
+          <DirectionsService {...directionsServiceProps}/>
         )
       }
 

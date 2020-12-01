@@ -9,11 +9,13 @@ import { setPoint } from '../redux'
 
 import './search.css'
 
+import functionsTime from '../utils/time'
+
 const Search = ({panTo, index}) => {
     //redux
     const dispatch = useDispatch()
 
-    const handleSetPoint = (index, value) => dispatch(setPoint(index, value))
+    const handleSetPoint = (index, value) => functionsTime(() => dispatch(setPoint(index, value)))
 
     const { 
         ready, 

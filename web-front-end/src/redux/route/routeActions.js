@@ -3,6 +3,8 @@ import { FETCH_BEST_ROUTE_SUCCESS, FETCH_BEST_ROUTE_ERROR, SET_SEARCH_FOR_ROUTE 
 import RouteService from '../../services/RouteService'
 import PointsValidation from '../../validations/PointsValidation'
 
+import functionsTime from '../../utils/time'
+
 const fetchBestRouteSuccess = (data) => {
     return {
         type: FETCH_BEST_ROUTE_SUCCESS,
@@ -22,7 +24,7 @@ export const fetchBestRoute = (ummaped_cities) => {
     return (dispatch) => {
         
         if(!PointsValidation.isValid(ummaped_cities)){
-            dispatch(fetchBestRouteError("Without first and last point"))
+            functionsTime(() => dispatch(fetchBestRouteError("Without first and last point"))) 
         }
         else {
             let mapped_cities = ummaped_cities.map((element) => {
@@ -53,12 +55,12 @@ export const fetchBestRoute = (ummaped_cities) => {
                         travelMode: 'DRIVING'
                     }
                 }
-                dispatch(fetchBestRouteSuccess(data))
-                dispatch(setSearchForRoute(true))
+                functionsTime(() => dispatch(fetchBestRouteSuccess(data))) 
+                functionsTime(() => dispatch(setSearchForRoute(true)))
             })
             .catch((error) => {
                 let errorMsg = error.message
-                dispatch(fetchBestRouteError(errorMsg))
+                functionsTime(() => dispatch(fetchBestRouteError(errorMsg))) 
             })
         }
     }
